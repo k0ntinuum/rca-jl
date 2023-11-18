@@ -32,13 +32,18 @@ function val(v,f,b)
     for i in length(v):-1:1 j += v[i]*b^(i-1) end
     f[j+1]
 end
+
+function zone(p,i,n)
+    map(i -> p[mod1(i, length(p))], i:i+n-1)
+end
         
 
 function encode!(p,f,b,n)
     s = deepcopy(f[1:n])
     c = zeros(Int64,length(p)) 
     for i in eachindex(p)
-        c[i] = mod(val(s[end-n+1:end],f,b)+p[i],b)
+        c[i] = mod(val(zone(f,i,n),f,b)+p[i],b)
+        #c[i] = mod(val(s[end-n+1:end],f,b)+p[i],b)
         push!(s,p[i])
         f[1] = mod(f[1] + c[i],b)
         f = circshift(f, c[i] + 1 )
@@ -48,8 +53,9 @@ end
 function decode!(c,f,b,n)
     s = deepcopy(f[1:n])
     p = zeros(Int64,length(c))
-    for i in eachindex(p)  
-        p[i] = mod(c[i] - val(s[end-n+1:end],f,b),b)
+    for i in eachindex(p)
+        p[i] = mod(c[i] - val(zone(f,i,n),f,b),b) 
+        #p[i] = mod(c[i] - val(s[end-n+1:end],f,b),b)
         push!(s,p[i])
         f[1] = mod(f[1] + c[i],b)
         f = circshift(f, c[i] + 1)
